@@ -1,0 +1,25 @@
+module(
+    name = "tpm_test",
+    version = "0.0.1",
+)
+
+bazel_dep(name = "rules_cc", version = "0.2.16")
+bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "tcg_tpm",
+    build_file = "//third_party/tcg_tpm:BUILD.tcg_tpm.bazel",
+    integrity = "sha256-5jSko4NNBp4yfaRNFR13kV071uLuh2PDXykbRQqGMIM=",
+    patch_args = ["-p1"],
+    patches = [
+        "//third_party/tcg_tpm:0001-openssl-version.patch",
+    ],
+    strip_prefix = "TPM-bc29a21d44b01396223c152a4834e52318591770",
+    urls = [
+        # Tag V184: https://github.com/TrustedComputingGroup/TPM/releases/tag/V184
+        "https://github.com/TrustedComputingGroup/TPM/archive/bc29a21d44b01396223c152a4834e52318591770.tar.gz",
+    ],
+)

@@ -1,0 +1,1 @@
+build --repo_env=BAZEL_CONLYOPTS="-std=gnu17"
