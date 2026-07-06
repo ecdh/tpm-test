@@ -1,0 +1,67 @@
+load("@rules_foreign_cc//foreign_cc:configure.bzl", "configure_make")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "all_srcs",
+    srcs = glob(["**"]),
+)
+
+configure_make(
+    name = "tpm2_tss_impl",
+    lib_source = "all_srcs",
+    autogen = True,
+    autogen_command = "bootstrap",
+    configure_in_place = True,
+    configure_options = [
+        "--enable-esys",
+        "--enable-static",
+        "--enable-nodl",
+        "--enable-tcti-device",
+        "--enable-tcti-mssim",
+        "--enable-tcti-swtpm",
+        "--disable-shared",
+        "--disable-fapi",
+        "--disable-fapi-async-tests",
+        "--disable-integration",
+        "--disable-weakcrypto",
+    ],
+    env = {
+        "PKG_CONFIG_PATH": "/usr/lib/x86_64-linux-gnu/pkgconfig",
+    },
+    out_data_dirs = [
+        "lib/pkgconfig",
+    ],
+    out_static_libs = [
+        "libtss2-esys.a",
+        "libtss2-mu.a",
+        "libtss2-policy.a",
+        "libtss2-rc.a",
+        "libtss2-sys.a",
+        "libtss2-tcti-cmd.a",
+        "libtss2-tcti-device.a",
+        "libtss2-tcti-i2c-ftdi.a",
+        "libtss2-tcti-i2c-helper.a",
+        "libtss2-tctildr.a",
+        "libtss2-tcti-libtpms.a",
+        "libtss2-tcti-mssim.a",
+        "libtss2-tcti-pcap.a",
+        "libtss2-tcti-spidev.a",
+        "libtss2-tcti-spi-ftdi.a",
+        "libtss2-tcti-spi-helper.a",
+        "libtss2-tcti-swtpm.a",
+    ],
+)
+
+cc_library(
+    name = "tpm2_tss",
+    deps = [":tpm2_tss_impl"],
+    linkopts = ["-lcrypto"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "gen_dir",
+    srcs = [":tpm2_tss_impl"],
+    output_group = "gen_dir",
+)

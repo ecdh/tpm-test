@@ -1,0 +1,14 @@
+diff --git a/bootstrap b/bootstrap
+index 4f75c02e..28b975d6 100755
+--- a/bootstrap
++++ b/bootstrap
+@@ -8,7 +8,8 @@
+ 
+ set -e
+ 
+-git describe --tags --always --dirty > VERSION
++#git describe --tags --always --dirty > VERSION
++echo "4.1.3" > VERSION
+ 
+ # generate list of source files for use in Makefile.am
+ # if you add new source files, you must run ./bootstrap again

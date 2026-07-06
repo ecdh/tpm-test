@@ -23,3 +23,18 @@ http_archive(
         "https://github.com/TrustedComputingGroup/TPM/archive/bc29a21d44b01396223c152a4834e52318591770.tar.gz",
     ],
 )
+
+http_archive(
+    name = "tpm2_tss",
+    build_file = "//third_party/tpm2_tss:BUILD.tpm2_tss.bazel",
+    integrity = "sha256-4zjIFs69cE5lgzE2KBo+ld275Goz3wVSRFZFF08E6M8=",
+    patch_args = ["-p1"],
+    patches = [
+        "//third_party/tpm2_tss:0001-version.patch",
+    ],
+    strip_prefix = "tpm2-tss-84d93ba949b2d877d4d321ad00306b7259abfbac",
+    urls = [
+        # Tag 4.1.3: https://github.com/tpm2-software/tpm2-tss/releases/tag/4.1.3
+        "https://github.com/tpm2-software/tpm2-tss/archive/84d93ba949b2d877d4d321ad00306b7259abfbac.tar.gz",
+    ],
+)
