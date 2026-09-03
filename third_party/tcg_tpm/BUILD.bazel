@@ -1,0 +1,22 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "0001-openssl-version.patch",
+    "0002-compiler-fixes.patch",
+    "BUILD.tcg_tpm.bazel",
+])
+
+alias(
+    name = "tcg_tpm",
+    actual = "@tcg_tpm//:tcg_tpm",
+)
+
+alias(
+    name = "tpm_headers",
+    actual = "@tcg_tpm//:tpm_headers",
+)
+
+alias(
+    name = "tpm_configuration",
+    actual = "@tcg_tpm//:tpm_configuration",
+)

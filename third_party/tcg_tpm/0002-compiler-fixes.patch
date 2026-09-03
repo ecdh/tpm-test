@@ -1,0 +1,263 @@
+diff --git a/TPMCmd/tpm/include/private/CommandDispatchData.h b/TPMCmd/tpm/include/private/CommandDispatchData.h
+index 81a3605..bcd2d5a 100644
+--- a/TPMCmd/tpm/include/private/CommandDispatchData.h
++++ b/TPMCmd/tpm/include/private/CommandDispatchData.h
+@@ -97,10 +97,18 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
+             UNMARSHAL_DISPATCH(TPM2B_DATA),
+ #define TPM2B_DIGEST_P_UNMARSHAL                (TPM2B_DATA_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_DIGEST),
++#if ALG_ECC
+ #define TPM2B_ECC_PARAMETER_P_UNMARSHAL         (TPM2B_DIGEST_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_ECC_PARAMETER),
++#else
++#define TPM2B_ECC_PARAMETER_P_UNMARSHAL (TPM2B_DIGEST_P_UNMARSHAL)
++#endif
++#if ALG_ECC
+ #define TPM2B_ECC_POINT_P_UNMARSHAL            (TPM2B_ECC_PARAMETER_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_ECC_POINT),
++#else
++#define TPM2B_ECC_POINT_P_UNMARSHAL (TPM2B_ECC_PARAMETER_P_UNMARSHAL)
++#endif
+ #define TPM2B_ENCRYPTED_SECRET_P_UNMARSHAL      (TPM2B_ECC_POINT_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_ENCRYPTED_SECRET),
+ #define TPM2B_EVENT_P_UNMARSHAL             (TPM2B_ENCRYPTED_SECRET_P_UNMARSHAL + 1)
+@@ -121,8 +129,12 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
+             UNMARSHAL_DISPATCH(TPM2B_NV_PUBLIC_2),
+ #define TPM2B_PRIVATE_P_UNMARSHAL               (TPM2B_NV_PUBLIC_2_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_PRIVATE),
++#if ALG_RSA
+ #define TPM2B_PUBLIC_KEY_RSA_P_UNMARSHAL        (TPM2B_PRIVATE_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_PUBLIC_KEY_RSA),
++#else
++#define TPM2B_PUBLIC_KEY_RSA_P_UNMARSHAL (TPM2B_PRIVATE_P_UNMARSHAL)
++#endif
+ #define TPM2B_SENSITIVE_P_UNMARSHAL           (TPM2B_PUBLIC_KEY_RSA_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPM2B_SENSITIVE),
+ #define TPM2B_SENSITIVE_CREATE_P_UNMARSHAL      (TPM2B_SENSITIVE_P_UNMARSHAL + 1)
+@@ -183,18 +195,27 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
+             UNMARSHAL_DISPATCH(TPMI_ALG_MAC_SCHEME),
+ #define TPMI_DH_PCR_P_UNMARSHAL                (TPMI_ALG_MAC_SCHEME_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMI_DH_PCR),
++#if ALG_ECC
+ #define TPMI_ECC_CURVE_P_UNMARSHAL              (TPMI_DH_PCR_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMI_ECC_CURVE),
+ #define TPMI_ECC_KEY_EXCHANGE_P_UNMARSHAL       (TPMI_ECC_CURVE_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMI_ECC_KEY_EXCHANGE),
++#else
++#define TPMI_ECC_CURVE_P_UNMARSHAL (TPMI_DH_PCR_P_UNMARSHAL)
++#define TPMI_ECC_KEY_EXCHANGE_P_UNMARSHAL (TPMI_ECC_CURVE_P_UNMARSHAL)
++#endif
+ #define TPMI_RH_ENABLES_P_UNMARSHAL          (TPMI_ECC_KEY_EXCHANGE_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMI_RH_ENABLES),
+ #define TPMI_RH_HIERARCHY_P_UNMARSHAL           (TPMI_RH_ENABLES_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMI_RH_HIERARCHY),
+ #define TPMT_KDF_SCHEME_P_UNMARSHAL             (TPMI_RH_HIERARCHY_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMT_KDF_SCHEME),
++#if ALG_RSA
+ #define TPMT_RSA_DECRYPT_P_UNMARSHAL            (TPMT_KDF_SCHEME_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMT_RSA_DECRYPT),
++#else
++#define TPMT_RSA_DECRYPT_P_UNMARSHAL (TPMT_KDF_SCHEME_P_UNMARSHAL)
++#endif
+ #define TPMT_SIG_SCHEME_P_UNMARSHAL             (TPMT_RSA_DECRYPT_P_UNMARSHAL + 1)
+             UNMARSHAL_DISPATCH(TPMT_SIG_SCHEME),
+ #define TPMT_SIGNATURE_P_UNMARSHAL              (TPMT_SIG_SCHEME_P_UNMARSHAL + 1)
+@@ -223,8 +235,12 @@ const _MARSHAL_T_ marshalArray[] = {
+             MARSHAL_DISPATCH(TPM2B_DATA),
+ #define TPM2B_DIGEST_P_MARSHAL                  (TPM2B_DATA_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_DIGEST),
++#if ALG_ECC
+ #define TPM2B_ECC_POINT_P_MARSHAL               (TPM2B_DIGEST_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_ECC_POINT),
++#else
++#define TPM2B_ECC_POINT_P_MARSHAL (TPM2B_DIGEST_P_MARSHAL)
++#endif
+ #define TPM2B_ENCRYPTED_SECRET_P_MARSHAL        (TPM2B_ECC_POINT_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_ENCRYPTED_SECRET),
+ #define TPM2B_ID_OBJECT_P_MARSHAL             (TPM2B_ENCRYPTED_SECRET_P_MARSHAL + 1)
+@@ -245,8 +261,12 @@ const _MARSHAL_T_ marshalArray[] = {
+             MARSHAL_DISPATCH(TPM2B_PRIVATE),
+ #define TPM2B_PUBLIC_P_MARSHAL                  (TPM2B_PRIVATE_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_PUBLIC),
++#if ALG_RSA
+ #define TPM2B_PUBLIC_KEY_RSA_P_MARSHAL          (TPM2B_PUBLIC_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_PUBLIC_KEY_RSA),
++#else
++#define TPM2B_PUBLIC_KEY_RSA_P_MARSHAL (TPM2B_PUBLIC_P_MARSHAL)
++#endif
+ #define TPM2B_SENSITIVE_DATA_P_MARSHAL          (TPM2B_PUBLIC_KEY_RSA_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPM2B_SENSITIVE_DATA),
+ #define TPM2B_TIMEOUT_P_MARSHAL                 (TPM2B_SENSITIVE_DATA_P_MARSHAL + 1)
+@@ -263,8 +283,12 @@ const _MARSHAL_T_ marshalArray[] = {
+             MARSHAL_DISPATCH(TPML_PCR_SELECTION),
+ #define TPMS_AC_OUTPUT_P_MARSHAL                (TPML_PCR_SELECTION_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPMS_AC_OUTPUT),
++#if ALG_ECC
+ #define TPMS_ALGORITHM_DETAIL_ECC_P_MARSHAL     (TPMS_AC_OUTPUT_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPMS_ALGORITHM_DETAIL_ECC),
++#else
++#define TPMS_ALGORITHM_DETAIL_ECC_P_MARSHAL (TPMS_AC_OUTPUT_P_MARSHAL)
++#endif
+ #define TPMS_CAPABILITY_DATA_P_MARSHAL     (TPMS_ALGORITHM_DETAIL_ECC_P_MARSHAL + 1)
+             MARSHAL_DISPATCH(TPMS_CAPABILITY_DATA),
+ #define TPMS_CONTEXT_P_MARSHAL                  (TPMS_CAPABILITY_DATA_P_MARSHAL + 1)
+diff --git a/TPMCmd/tpm/include/tpm_public/TpmAlgorithmDefines.h b/TPMCmd/tpm/include/tpm_public/TpmAlgorithmDefines.h
+index 20d1da5..2ea5f63 100644
+--- a/TPMCmd/tpm/include/tpm_public/TpmAlgorithmDefines.h
++++ b/TPMCmd/tpm/include/tpm_public/TpmAlgorithmDefines.h
+@@ -148,6 +148,9 @@
+ 
+ #  define MAX_RSA_KEY_BITS  RSA_MAX_KEY_SIZE_BITS
+ #  define MAX_RSA_KEY_BYTES BITS_TO_BYTES(RSA_MAX_KEY_SIZE_BITS)
++#else
++#define MAX_RSA_KEY_BITS 0
++#define MAX_RSA_KEY_BYTES 0
+ #endif  // ALG_RSA
+ 
+ // Table "Defines for AES Symmetric Cipher Algorithm Constants" (TCG Algorithm Registry)
+diff --git a/TPMCmd/tpm/src/crypt/AlgorithmTests.c b/TPMCmd/tpm/src/crypt/AlgorithmTests.c
+index 53dbedd..673866f 100644
+--- a/TPMCmd/tpm/src/crypt/AlgorithmTests.c
++++ b/TPMCmd/tpm/src/crypt/AlgorithmTests.c
+@@ -586,12 +586,14 @@ static TPM_RC TestEccSignAndVerify(TPM_ALG_ID scheme, ALGORITHM_VECTOR* toTest)
+             LoadEccParameter(&testSig.signature.ecdsa.signatureR, &c_TestEcDsa_r);
+             LoadEccParameter(&testSig.signature.ecdsa.signatureS, &c_TestEcDsa_s);
+             break;
++#  if ALG_ECSCHNORR
+         case TPM_ALG_ECSCHNORR:
+             LoadEccParameter(&testSig.signature.ecschnorr.signatureR,
+                              &c_TestEcSchnorr_r);
+             LoadEccParameter(&testSig.signature.ecschnorr.signatureS,
+                              &c_TestEcSchnorr_s);
+             break;
++#  endif  // ALG_ECSCHNORR
+         case TPM_ALG_SM2:
+             // don't have a test for SM2
+             return TPM_RC_SUCCESS;
+diff --git a/TPMCmd/tpm/src/crypt/CryptEccSignature.c b/TPMCmd/tpm/src/crypt/CryptEccSignature.c
+index faeed67..97dcf10 100644
+--- a/TPMCmd/tpm/src/crypt/CryptEccSignature.c
++++ b/TPMCmd/tpm/src/crypt/CryptEccSignature.c
+@@ -37,24 +37,25 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
+     CRYPT_ECC_INITIALIZED(bnD, &signKey->sensitive.sensitive.ecc.b);
+     CRYPT_ECC_NUM(bnR);
+     CRYPT_ECC_NUM(bnS);
++    TPMS_SIGNATURE_ECC* eccSig = (TPMS_SIGNATURE_ECC*)&signature->signature;
+     TPM_RC retVal = TPM_RC_SCHEME;
+     //
+     NOT_REFERENCED(scheme);
+     if(E == NULL)
+         ERROR_EXIT(TPM_RC_VALUE);
+-    signature->signature.ecdaa.signatureR.t.size =
+-        sizeof(signature->signature.ecdaa.signatureR.t.buffer);
+-    signature->signature.ecdaa.signatureS.t.size =
+-        sizeof(signature->signature.ecdaa.signatureS.t.buffer);
++    eccSig->signatureR.t.size = sizeof(eccSig->signatureR.t.buffer);
++    eccSig->signatureS.t.size = sizeof(eccSig->signatureS.t.buffer);
+     TPM_DO_SELF_TEST(signature->sigAlg);
+     switch(signature->sigAlg)
+     {
++#  if ALG_ECDSA
+         case TPM_ALG_ECDSA:
+             retVal = TpmEcc_SignEcdsa(bnR, bnS, E, bnD, digest, rand);
+             break;
++#  endif
+ #  if ALG_ECDAA
+         case TPM_ALG_ECDAA:
+-            retVal = TpmEcc_SignEcdaa(&signature->signature.ecdaa.signatureR,
++            retVal = TpmEcc_SignEcdaa(&eccSig->signatureR,
+                                       bnS,
+                                       E,
+                                       bnD,
+@@ -68,7 +69,7 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
+ #  if ALG_ECSCHNORR
+         case TPM_ALG_ECSCHNORR:
+             retVal = TpmEcc_SignEcSchnorr(
+-                bnR, bnS, E, bnD, digest, signature->signature.ecschnorr.hash, rand);
++                bnR, bnS, E, bnD, digest, eccSig->hash, rand);
+             break;
+ #  endif
+ #  if ALG_SM2
+@@ -85,11 +86,9 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
+         NUMBYTES orderBytes = (NUMBYTES)BITS_TO_BYTES(
+             ExtMath_SizeInBits(ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E))));
+         if(bnR != NULL)
+-            TpmMath_IntTo2B(
+-                bnR, &signature->signature.ecdaa.signatureR.b, orderBytes);
++            TpmMath_IntTo2B(bnR, &eccSig->signatureR.b, orderBytes);
+         if(bnS != NULL)
+-            TpmMath_IntTo2B(
+-                bnS, &signature->signature.ecdaa.signatureS.b, orderBytes);
++            TpmMath_IntTo2B(bnS, &eccSig->signatureS.b, orderBytes);
+     }
+ Exit:
+     CRYPT_CURVE_FREE(E);
+@@ -113,6 +112,7 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
+     CRYPT_ECC_NUM(bnR);
+     CRYPT_ECC_NUM(bnS);
+     CRYPT_POINT_INITIALIZED(ecQ, &signKey->publicArea.unique.ecc);
++    TPMS_SIGNATURE_ECC* eccSig = (TPMS_SIGNATURE_ECC*)&signature->signature;
+     const Crypt_Int* order;
+     TPM_RC           retVal;
+ 
+@@ -124,7 +124,9 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
+     //    // Make sure that the scheme is valid
+     switch(signature->sigAlg)
+     {
++#  if ALG_ECDSA
+         case TPM_ALG_ECDSA:
++#  endif
+ #  if ALG_ECSCHNORR
+         case TPM_ALG_ECSCHNORR:
+ #  endif
+@@ -139,8 +141,8 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
+     // Can convert r and s after determining that the scheme is an ECC scheme. If
+     // this conversion doesn't work, it means that the unmarshaling code for
+     // an ECC signature is broken.
+-    TpmMath_IntFrom2B(bnR, &signature->signature.ecdsa.signatureR.b);
+-    TpmMath_IntFrom2B(bnS, &signature->signature.ecdsa.signatureS.b);
++    TpmMath_IntFrom2B(bnR, &eccSig->signatureR.b);
++    TpmMath_IntFrom2B(bnS, &eccSig->signatureS.b);
+ 
+     // r and s have to be greater than 0 but less than the curve order
+     if(ExtMath_IsZero(bnR) || ExtMath_IsZero(bnS))
+@@ -151,9 +153,11 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
+ 
+     switch(signature->sigAlg)
+     {
++#  if ALG_ECDSA
+         case TPM_ALG_ECDSA:
+             retVal = TpmEcc_ValidateSignatureEcdsa(bnR, bnS, E, ecQ, digest);
+             break;
++#  endif
+ 
+ #  if ALG_ECSCHNORR
+         case TPM_ALG_ECSCHNORR:
+@@ -167,6 +171,7 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
+             break;
+ #  endif
+         default:
++            retVal = TPM_RC_FAILURE;
+             FAIL_RC(FATAL_ERROR_INTERNAL);
+     }
+ Exit:
+diff --git a/TPMCmd/tpm/cryptolibs/Ossl/BnToOsslMath.c b/TPMCmd/tpm/cryptolibs/Ossl/BnToOsslMath.c
+index b83f34b..b08a301 100644
+--- a/TPMCmd/tpm/cryptolibs/Ossl/BnToOsslMath.c
++++ b/TPMCmd/tpm/cryptolibs/Ossl/BnToOsslMath.c
+@@ -311,6 +311,7 @@ Exit:
+     OSSL_LEAVE();
+     return OK;
+ }
++#  endif  // ALG_RSA
+ 
+ //*** BnModInverse()
+ // Modular multiplicative inverse
+@@ -334,7 +335,6 @@ Exit:
+     OSSL_LEAVE();
+     return OK;
+ }
+-#  endif  // ALG_RSA
+ 
+ #  if ALG_ECC
+ 
