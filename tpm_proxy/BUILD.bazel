@@ -1,0 +1,47 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "tpm_proxy_lib",
+    srcs = [
+        "src/devices/dynamic_tcti.rs",
+        "src/devices/linux.rs",
+        "src/devices/mock.rs",
+        "src/devices/mod.rs",
+        "src/devices/unix_socket.rs",
+        "src/lib.rs",
+        "src/server.rs",
+    ],
+    crate_name = "tpm_proxy_lib",
+    edition = "2021",
+    deps = [
+        "@rust_crates//:anyhow",
+        "@rust_crates//:clap",
+        "@rust_crates//:env_logger",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi-sys",
+    ],
+)
+
+rust_binary(
+    name = "tpm_proxy",
+    srcs = ["src/main.rs"],
+    edition = "2021",
+    deps = [
+        ":tpm_proxy_lib",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:clap",
+        "@rust_crates//:env_logger",
+        "@rust_crates//:log",
+    ],
+)
+
+rust_test(
+    name = "tpm_proxy_lib_test",
+    crate = ":tpm_proxy_lib",
+    edition = "2021",
+    deps = [
+        "@rust_crates//:env_logger",
+    ],
+)
