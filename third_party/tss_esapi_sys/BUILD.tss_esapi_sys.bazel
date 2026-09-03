@@ -1,0 +1,15 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "tss_esapi_sys",
+    srcs = glob(["src/**/*.rs"]),
+    compile_data = glob(["src/bindings/*.rs"]),
+    crate_name = "tss_esapi_sys",
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    deps = [
+        "@tpm_test//third_party/tpm2_tss",
+    ],
+)

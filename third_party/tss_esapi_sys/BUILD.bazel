@@ -1,0 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["BUILD.tss_esapi_sys.bazel"])
+
+alias(
+    name = "tss_esapi_sys",
+    actual = "@tss_esapi_sys//:tss_esapi_sys",
+)

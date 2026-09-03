@@ -7,6 +7,7 @@ bazel_dep(name = "rules_cc", version = "0.2.16")
 bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_rust", version = "0.68.1")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -42,3 +43,27 @@ http_archive(
         "https://github.com/tpm2-software/tpm2-tss/archive/84d93ba949b2d877d4d321ad00306b7259abfbac.tar.gz",
     ],
 )
+
+http_archive(
+    name = "tss_esapi_sys",
+    build_file = "//third_party/tss_esapi_sys:BUILD.tss_esapi_sys.bazel",
+    integrity = "sha256-FF7+x2FVUCTnpmsE3gQY//UMwJinog5RyjPGmnrAf6o=",
+    strip_prefix = "rust-tss-esapi-8ee23492d3db38ce466e90f641eb6c4917d60d9c/tss-esapi-sys",
+    urls = [
+        # Tag tss-esapi-7.6.0: https://github.com/parallaxsecond/rust-tss-esapi/releases/tag/tss-esapi-7.6.0
+        "https://github.com/parallaxsecond/rust-tss-esapi/archive/8ee23492d3db38ce466e90f641eb6c4917d60d9c.tar.gz",
+    ],
+)
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "tpm_test_crates",
+    cargo_lockfile = "//third_party/crates_io:Cargo.lock",
+    manifests = ["//third_party/crates_io:Cargo.toml"],
+)
+crate.annotation(
+    crate = "tss-esapi-sys",
+    override_target_lib = "//third_party/tss_esapi_sys:tss_esapi_sys",
+)
+
+use_repo(crate, rust_crates = "tpm_test_crates")
