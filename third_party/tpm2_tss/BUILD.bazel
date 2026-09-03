@@ -1,0 +1,14 @@
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+exports_files([
+    "0001-version.patch",
+    "0002-static-linking.patch",
+    "BUILD.tpm2_tss.bazel",
+])
+
+alias(
+    name = "tpm2_tss",
+    actual = "@tpm2_tss//:tpm2_tss",
+)

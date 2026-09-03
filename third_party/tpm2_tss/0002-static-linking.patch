@@ -1,0 +1,238 @@
+diff --git a/src/tss2-tcti/tcti-device.c b/src/tss2-tcti/tcti-device.c
+index adb8a9b4..b15264aa 100644
+--- a/src/tss2-tcti/tcti-device.c
++++ b/src/tss2-tcti/tcti-device.c
+@@ -503,6 +503,7 @@ Tss2_Tcti_Device_Init(TSS2_TCTI_CONTEXT *tctiContext, size_t *size, const char *
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_device_info = {
+     .version = TCTI_VERSION,
+     .name = "tcti-device",
+@@ -516,3 +517,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_device_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-i2c-ftdi.c b/src/tss2-tcti/tcti-i2c-ftdi.c
+index 86b41b09..d3853910 100644
+--- a/src/tss2-tcti/tcti-i2c-ftdi.c
++++ b/src/tss2-tcti/tcti-i2c-ftdi.c
+@@ -256,6 +256,7 @@ Tss2_Tcti_I2c_Ftdi_Init(TSS2_TCTI_CONTEXT *tcti_context, size_t *size, const cha
+     return Tss2_Tcti_I2c_Helper_Init(tcti_context, size, &tcti_platform);
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_i2c_ftdi_info
+     = { .version = TCTI_VERSION,
+         .name = "tcti-i2c-ftdi",
+@@ -267,3 +268,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_i2c_ftdi_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-i2c-helper.c b/src/tss2-tcti/tcti-i2c-helper.c
+index ec016952..63a2fb96 100644
+--- a/src/tss2-tcti/tcti-i2c-helper.c
++++ b/src/tss2-tcti/tcti-i2c-helper.c
+@@ -884,6 +884,7 @@ Tss2_Tcti_I2c_Helper_Init(TSS2_TCTI_CONTEXT             *tcti_context,
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_i2c_helper_info = {
+     .version = TCTI_VERSION,
+     .name = "tcti-i2c-helper",
+@@ -903,3 +904,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_i2c_helper_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-libtpms.c b/src/tss2-tcti/tcti-libtpms.c
+index daf94e2b..2ce4075a 100644
+--- a/src/tss2-tcti/tcti-libtpms.c
++++ b/src/tss2-tcti/tcti-libtpms.c
+@@ -943,6 +943,7 @@ cleanup_dl:
+     return rc;
+ }
+ 
++#ifndef NO_DL
+ /* public info structure */
+ static const TSS2_TCTI_INFO tss2_tcti_libtpms_info = {
+     .version = TCTI_VERSION,
+@@ -956,3 +957,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_libtpms_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-mssim.c b/src/tss2-tcti/tcti-mssim.c
+index 059aea45..8398510c 100644
+--- a/src/tss2-tcti/tcti-mssim.c
++++ b/src/tss2-tcti/tcti-mssim.c
+@@ -602,6 +602,7 @@ fail_out:
+     return rc;
+ }
+ 
++#ifndef NO_DL
+ /* public info structure */
+ static const TSS2_TCTI_INFO tss2_tcti_mssim_info = {
+     .version = TCTI_VERSION,
+@@ -615,3 +616,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_mssim_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-null.c b/src/tss2-tcti/tcti-null.c
+index d8db2016..f8198672 100644
+--- a/src/tss2-tcti/tcti-null.c
++++ b/src/tss2-tcti/tcti-null.c
+@@ -141,6 +141,7 @@ Tss2_Tcti_Null_Init(TSS2_TCTI_CONTEXT *tctiContext, size_t *size, const char *co
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ /* public info structure */
+ const TSS2_TCTI_INFO tss2_tcti_info = {
+     .version = TCTI_VERSION,
+@@ -154,3 +155,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-pcap.c b/src/tss2-tcti/tcti-pcap.c
+index dab6b7c6..208454de 100644
+--- a/src/tss2-tcti/tcti-pcap.c
++++ b/src/tss2-tcti/tcti-pcap.c
+@@ -258,6 +258,7 @@ Tss2_Tcti_Pcap_Init(TSS2_TCTI_CONTEXT *tctiContext, size_t *size, const char *co
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ /* public info structure */
+ static const TSS2_TCTI_INFO tss2_tcti_pcap_info = {
+     .version = TCTI_VERSION,
+@@ -271,3 +272,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_pcap_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-spi-ftdi.c b/src/tss2-tcti/tcti-spi-ftdi.c
+index 6f3d3426..69fcafe9 100644
+--- a/src/tss2-tcti/tcti-spi-ftdi.c
++++ b/src/tss2-tcti/tcti-spi-ftdi.c
+@@ -201,6 +201,7 @@ Tss2_Tcti_Spi_Ftdi_Init(TSS2_TCTI_CONTEXT *tcti_context, size_t *size, const cha
+     return Tss2_Tcti_Spi_Helper_Init(tcti_context, size, &tcti_platform);
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_spi_ftdi_info
+     = { .version = TCTI_VERSION,
+         .name = "tcti-spi-ftdi",
+@@ -212,3 +213,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_spi_ftdi_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-spi-helper.c b/src/tss2-tcti/tcti-spi-helper.c
+index 2a6a9d7c..dec0b8c0 100644
+--- a/src/tss2-tcti/tcti-spi-helper.c
++++ b/src/tss2-tcti/tcti-spi-helper.c
+@@ -830,6 +830,7 @@ Tss2_Tcti_Spi_Helper_Init(TSS2_TCTI_CONTEXT             *tcti_context,
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_spi_helper_info = {
+     .version = TCTI_VERSION,
+     .name = "tcti-spi-helper",
+@@ -849,3 +850,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_spi_helper_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-spi-ltt2go.c b/src/tss2-tcti/tcti-spi-ltt2go.c
+index d12abafa..f3e64c9c 100644
+--- a/src/tss2-tcti/tcti-spi-ltt2go.c
++++ b/src/tss2-tcti/tcti-spi-ltt2go.c
+@@ -369,6 +369,7 @@ Tss2_Tcti_Spi_Ltt2go_Init(TSS2_TCTI_CONTEXT *tcti_context, size_t *size, const c
+     return Tss2_Tcti_Spi_Helper_Init(tcti_context, size, &tcti_platform);
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_ltt2go_info
+     = { .version = TCTI_VERSION,
+         .name = "tcti-spi-ltt2go",
+@@ -380,3 +381,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_ltt2go_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-spidev.c b/src/tss2-tcti/tcti-spidev.c
+index b3f136f4..f298de47 100644
+--- a/src/tss2-tcti/tcti-spidev.c
++++ b/src/tss2-tcti/tcti-spidev.c
+@@ -189,6 +189,7 @@ Tss2_Tcti_Spidev_Init(TSS2_TCTI_CONTEXT *tcti_context, size_t *size, const char
+     return Tss2_Tcti_Spi_Helper_Init(tcti_context, size, &platform);
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_spidev_info
+     = { .version = TCTI_VERSION,
+         .name = "tcti-spidev",
+@@ -200,3 +201,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_spidev_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-swtpm.c b/src/tss2-tcti/tcti-swtpm.c
+index 7961df59..1b14b7c8 100644
+--- a/src/tss2-tcti/tcti-swtpm.c
++++ b/src/tss2-tcti/tcti-swtpm.c
+@@ -589,6 +589,7 @@ fail_out:
+ }
+ 
+ /* public info structure */
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_swtpm_info = {
+     .version = TCTI_VERSION,
+     .name = "tcti-swtpm",
+@@ -601,3 +602,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_swtpm_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-tbs.c b/src/tss2-tcti/tcti-tbs.c
+index e45b041f..1337dcf4 100644
+--- a/src/tss2-tcti/tcti-tbs.c
++++ b/src/tss2-tcti/tcti-tbs.c
+@@ -290,6 +290,7 @@ Tss2_Tcti_Tbs_Init(TSS2_TCTI_CONTEXT *tctiContext, size_t *size, const char *con
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ static const TSS2_TCTI_INFO tss2_tcti_tbs_info = {
+     .version = TCTI_VERSION,
+     .name = "tcti-tbs",
+@@ -302,3 +303,4 @@ const TSS2_TCTI_INFO *
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_tbs_info;
+ }
++#endif
+diff --git a/src/tss2-tcti/tcti-cmd.c b/src/tss2-tcti/tcti-cmd.c
+index 0567fbf9..33a0429f 100644
+--- a/src/tss2-tcti/tcti-cmd.c
++++ b/src/tss2-tcti/tcti-cmd.c
+@@ -597,6 +597,7 @@
+     return TSS2_RC_SUCCESS;
+ }
+ 
++#ifndef NO_DL
+ /* public info structure */
+ static const TSS2_TCTI_INFO tss2_tcti_cmd_info = {
+     .version = TCTI_VERSION,
+@@ -610,3 +611,4 @@
+ Tss2_Tcti_Info(void) {
+     return &tss2_tcti_cmd_info;
+ }
++#endif
