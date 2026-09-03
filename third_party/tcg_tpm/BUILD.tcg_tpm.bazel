@@ -1,0 +1,264 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# ==============================================================================
+# 1. Header & Interface Libraries
+# ==============================================================================
+
+# Provides all TPM 2.0 reference implementation headers (tpm_public, platform_interface, private)
+cc_library(
+    name = "tpm_headers",
+    hdrs = glob(["TPMCmd/tpm/include/**/*.h"]),
+    includes = [
+        "TPMCmd/tpm/include",
+        "TPMCmd/tpm/include/platform_interface",
+        "TPMCmd/tpm/include/platform_interface/prototypes",
+        "TPMCmd/tpm/include/private",
+        "TPMCmd/tpm/include/private/prototypes",
+        "TPMCmd/tpm/include/tpm_public",
+    ],
+)
+
+cc_library(
+    name = "tpm_platform_interface",
+    hdrs = glob(["TPMCmd/tpm/include/platform_interface/**/*.h"]),
+    includes = ["TPMCmd/tpm/include/platform_interface"],
+    deps = [":tpm_headers"],
+)
+
+cc_library(
+    name = "tpm_cryptolib_common",
+    hdrs = glob([
+        "TPMCmd/tpm/cryptolibs/common/include/**/*.h",
+        "TPMCmd/tpm/cryptolibs/common/include/**/*.inl",
+    ]),
+    includes = ["TPMCmd/tpm/cryptolibs/common/include"],
+)
+
+# ==============================================================================
+# 2. Configuration (Injectable Dependency)
+# ==============================================================================
+
+# Default TpmConfiguration provided by upstream TCG reference implementation
+cc_library(
+    name = "tpm_configuration_default",
+    srcs = ["TPMCmd/TpmConfiguration/TpmVendorCommandHandlers/Vendor_TCG_Test.c"],
+    hdrs = glob([
+        "TPMCmd/TpmConfiguration/TpmConfiguration/**/*.h",
+        "TPMCmd/TpmConfiguration/TpmConfiguration/**/*.inl",
+    ]),
+    includes = ["TPMCmd/TpmConfiguration"],
+    deps = [":tpm_headers"],
+)
+
+# Extension point for downstream repos to override TPM configuration
+label_flag(
+    name = "tpm_configuration",
+    build_setting_default = ":tpm_configuration_default",
+)
+
+# ==============================================================================
+# 3. Cryptographic Implementation Libraries
+# ==============================================================================
+
+TPM_CRYPTO_DEFINES = [
+    "HASH_LIB=Ossl",
+    "SYM_LIB=Ossl",
+    "MATH_LIB=TpmBigNum",
+    "BN_MATH_LIB=Ossl",
+] + select({
+    "@platforms//cpu:x86_32": ["RADIX_BITS=32"],
+    "@platforms//cpu:armv7": ["RADIX_BITS=32"],
+    "@platforms//cpu:arm": ["RADIX_BITS=32"],
+    "//conditions:default": ["RADIX_BITS=64"],
+})
+
+cc_library(
+    name = "tpm_cryptolib_bignum_headers",
+    hdrs = glob(["TPMCmd/tpm/cryptolibs/TpmBigNum/include/**/*.h"]),
+    includes = ["TPMCmd/tpm/cryptolibs/TpmBigNum/include"],
+)
+
+cc_library(
+    name = "tpm_cryptolib_ossl",
+    srcs = [
+        "TPMCmd/tpm/cryptolibs/Ossl/BnToOsslMath.c",
+        "TPMCmd/tpm/cryptolibs/Ossl/TpmToOsslSupport.c",
+    ],
+    hdrs = glob([
+        "TPMCmd/tpm/cryptolibs/Ossl/include/**/*.h",
+        "TPMCmd/tpm/include/**/*.h",
+    ]),
+    defines = TPM_CRYPTO_DEFINES,
+    includes = [
+        "TPMCmd/tpm/cryptolibs/Ossl/include",
+        "TPMCmd/tpm/include",
+    ],
+    linkopts = ["-lcrypto"],
+    deps = [
+        ":tpm_configuration",
+        ":tpm_cryptolib_bignum_headers",
+        ":tpm_cryptolib_common",
+        ":tpm_headers",
+    ],
+)
+
+cc_library(
+    name = "tpm_cryptolib_bignum",
+    srcs = [
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/BnConvert.c",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/BnEccConstants.c",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/BnMath.c",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/BnMemory.c",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/BnUtil.c",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/TpmBigNumThunks.c",
+    ],
+    hdrs = glob([
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/**/*.h",
+        "TPMCmd/tpm/include/**/*.h",
+    ]),
+    defines = TPM_CRYPTO_DEFINES,
+    includes = [
+        "TPMCmd/tpm/cryptolibs/TpmBigNum",
+        "TPMCmd/tpm/cryptolibs/TpmBigNum/include",
+        "TPMCmd/tpm/include",
+    ],
+    deps = [
+        ":tpm_configuration",
+        ":tpm_cryptolib_bignum_headers",
+        ":tpm_cryptolib_common",
+        ":tpm_cryptolib_ossl",
+        ":tpm_headers",
+    ],
+)
+
+# ==============================================================================
+# 4. Core TPM Engine Library
+# ==============================================================================
+
+cc_library(
+    name = "tpm_core",
+    srcs = glob(["TPMCmd/tpm/src/**/*.c"]),
+    hdrs = glob(["TPMCmd/tpm/include/**/*.h"]),
+    defines = TPM_CRYPTO_DEFINES,
+    includes = [
+        "TPMCmd/tpm/include",
+        "TPMCmd/tpm/include/platform_interface",
+        "TPMCmd/tpm/include/platform_interface/prototypes",
+        "TPMCmd/tpm/include/private",
+        "TPMCmd/tpm/include/private/prototypes",
+        "TPMCmd/tpm/include/tpm_public",
+    ],
+    deps = [
+        ":tpm_configuration",
+        ":tpm_cryptolib_bignum",
+        ":tpm_cryptolib_common",
+        ":tpm_cryptolib_ossl",
+        ":tpm_platform_interface",
+        ":tpm_headers",
+    ],
+)
+
+# ==============================================================================
+# 5. Platform Abstraction Layer
+# ==============================================================================
+
+cc_library(
+    name = "tpm_platform",
+    srcs = glob(["TPMCmd/Platform/src/*.c"]),
+    hdrs = glob([
+        "TPMCmd/Platform/include/**/*.h",
+        "TPMCmd/tpm/include/**/*.h",
+    ]),
+    defines = [
+        "_UNICODE",
+        "_LIB",
+    ],
+    includes = [
+        "TPMCmd/Platform/include",
+        "TPMCmd/Platform/include/prototypes",
+        "TPMCmd/tpm/include",
+    ],
+    alwayslink = True,
+    deps = [
+        ":tpm_configuration",
+        ":tpm_core",
+        ":tpm_platform_interface",
+        ":tpm_headers",
+    ],
+)
+
+# ==============================================================================
+# 6. Simulator Executable & Components
+# ==============================================================================
+
+cc_library(
+    name = "simulator_lib",
+    srcs = [
+        "TPMCmd/Simulator/src/TPMCmdp.c",
+        "TPMCmd/Simulator/src/TcpServer.c",
+    ],
+    hdrs = glob([
+        "TPMCmd/Simulator/include/**/*.h",
+        "TPMCmd/Simulator/src/*.h",
+        "TPMCmd/tpm/include/**/*.h",
+    ]),
+    defines = [
+        "_UNICODE",
+        "_CONSOLE",
+        "_DIAGNOSTICS",
+    ],
+    includes = [
+        "TPMCmd/Simulator/include",
+        "TPMCmd/Simulator/include/prototypes",
+        "TPMCmd/Simulator/src",
+        "TPMCmd/tpm/include",
+    ],
+    linkopts = [
+        "-lm",
+        "-lpthread",
+    ],
+    deps = [
+        ":tpm_configuration",
+        ":tpm_core",
+        ":tpm_platform",
+        ":tpm_platform_interface",
+        ":tpm_headers",
+    ],
+)
+
+# "Simulator" uses a capital 'S' to match the upstream TCG TPM executable
+# and project name defined in TPMCmd/Simulator/CMakeLists.txt and Simulator.vcxproj.
+cc_binary(
+    name = "Simulator",
+    srcs = ["TPMCmd/Simulator/src/TPMCmds.c"],
+    defines = [
+        "_UNICODE",
+        "_CONSOLE",
+        "_DIAGNOSTICS",
+    ],
+    includes = [
+        "TPMCmd/Simulator/include",
+        "TPMCmd/Simulator/src",
+    ],
+    deps = [
+        ":simulator_lib",
+        ":tpm_configuration",
+        ":tpm_core",
+        ":tpm_cryptolib_bignum",
+        ":tpm_cryptolib_ossl",
+        ":tpm_platform",
+    ],
+)
+
+# Lowercase alias conforming to standard Bazel naming conventions.
+alias(
+    name = "simulator",
+    actual = ":Simulator",
+)
+
+alias(
+    name = "tcg_tpm",
+    actual = ":Simulator",
+)
