@@ -14,6 +14,8 @@ implementations against TCG specifications and custom platform profiles.
 - `tpm_test_runner/`: Unified Bazel test execution framework with dynamic
   simulator lifecycle management, port allocation, and late-bound test
   environments.
+- `tpm_test_support/`: High-level TPM client library (`TpmClient`), dynamic
+  capability discovery (`TpmConfig`), and metadata filtering framework.
 
 ## Prerequisites
 

@@ -13,6 +13,12 @@ def _tpm_wrapped_test_impl(ctx):
         env["SETUP_TOOL"] = ctx.executable.setup_tool.short_path
     if ctx.executable.teardown_tool:
         env["TEARDOWN_TOOL"] = ctx.executable.teardown_tool.short_path
+    if ctx.attr.category:
+        env["TPM_TEST_CATEGORY"] = ctx.attr.category
+    if ctx.attr.exclude_category:
+        env["TPM_TEST_EXCLUDE_CATEGORY"] = ctx.attr.exclude_category
+    if ctx.attr.hierarchies:
+        env["TPM_TEST_HIERARCHIES"] = ctx.attr.hierarchies
 
     # Generate the runner script.
     output_script = ctx.actions.declare_file(ctx.label.name + "_runner.sh")
@@ -23,7 +29,6 @@ def _tpm_wrapped_test_impl(ctx):
     ] + ['export {}="{}"'.format(k, v) for k, v in env.items()] + [
         'exec "./{}" "$@"'.format(test_runner.short_path),
     ]
-
     ctx.actions.write(
         output = output_script,
         content = "\n".join(script_lines) + "\n",
@@ -55,6 +60,9 @@ _tpm_wrapped_test = rule(
     doc = "A custom test rule to run wrapped TPM tests.",
     implementation = _tpm_wrapped_test_impl,
     attrs = {
+        "category": attr.string(
+            doc = "Optional category inclusion filter (comma-separated).",
+        ),
         "data": attr.label_list(
             allow_files = True,
             doc = "The list of files needed by this test at runtime.",
@@ -63,6 +71,12 @@ _tpm_wrapped_test = rule(
             default = Label("//tpm_test_runner:tpm_environment"),
             doc = "The TPM environment to use.",
             providers = [TpmEnvInfo],
+        ),
+        "exclude_category": attr.string(
+            doc = "Optional category exclusion filter (comma-separated).",
+        ),
+        "hierarchies": attr.string(
+            doc = "Optional allowed hierarchies filter (comma-separated).",
         ),
         "setup_tool": attr.label(
             cfg = "target",
@@ -105,6 +119,9 @@ def tpm_test_suite(
         environment = None,
         setup_tool = None,
         teardown_tool = None,
+        category = None,
+        exclude_category = None,
+        hierarchies = None,
         **kwargs):
     """Defines a test suite with parameterized tests by dynamically generating targets.
 
@@ -118,6 +135,9 @@ def tpm_test_suite(
         environment: Optional TPM test environment target override.
         setup_tool: Optional Level 2 pre-test setup tool target.
         teardown_tool: Optional Level 2 post-test teardown tool target.
+        category: Optional comma-separated list of test categories to include (e.g. "compliance,pcr").
+        exclude_category: Optional comma-separated list of test categories to exclude (e.g. "slow").
+        hierarchies: Optional comma-separated list of allowed hierarchies (e.g. "null,owner").
         **kwargs: Additional arguments passed to the native test_suite (e.g., tags, visibility).
     """
     if type(tests) == "list":
@@ -144,6 +164,9 @@ def tpm_test_suite(
             environment = environment,
             setup_tool = setup_tool,
             teardown_tool = teardown_tool,
+            category = category,
+            exclude_category = exclude_category,
+            hierarchies = hierarchies,
         )
 
         generated_tests.append(":" + wrapped_test_name)
