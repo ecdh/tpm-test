@@ -1,0 +1,29 @@
+{
+  profile_name: "PQC_Algorithm_Profile",
+  version: "1.0",
+  algorithms: {
+    hash: {
+      mandatory: ["sha256", "sha384"],
+      optional: ["sha512"],
+      deprecated: ["sha1"],
+      not_allowed: []
+    },
+    asymmetric: {
+      ecc_curves: {
+        mandatory: ["nist_p256", "nist_p384"],
+        optional: [],
+        not_allowed: []
+      },
+      algorithms: {
+        mandatory: [],
+        optional: ["mldsa87", "mlkem768"],
+        not_allowed: []
+      }
+    },
+    symmetric: {
+      mandatory: ["aes"],
+      optional: [],
+      not_allowed: []
+    }
+  }
+}

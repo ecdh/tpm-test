@@ -7,6 +7,8 @@ fresh simulator or proxy environment for isolated execution.
 
 ## Test suites
 
+### Base compliance suites
+
 - **`startup_test`**: Validates power-on initialization (`TPM2_Startup(CLEAR)`).
 - **`pcr_test`**: Validates Platform Configuration Register operations
   (`TPM2_PCR_Read`, `TPM2_PCR_Extend`, and `TPM2_PCR_Reset` on resettable slot
@@ -28,6 +30,29 @@ fresh simulator or proxy environment for isolated execution.
 - **`cli_test`**: Validates end-to-end `tpm_tool` CLI subcommands (`startup`,
   `get-random`, `hash`, `pcr`, `ek`, and `quote`) against a live TPM.
 
+### Profile-driven compliance suites
+
+- **`hash_test`**: Validates hardware vs software hashing for profile-defined
+  hash algorithms (`sha256`, `sha384`, `sha512`, `sm3_256`, `sha1`).
+- **`ecc_curve_test`**: Validates ECC primary key creation across
+  profile-defined curve requirement levels (`nist_p256`, `nist_p384`, `sm2`).
+- **`rsa_key_test`**: Validates RSA primary key creation across profile-defined
+  key size tiers (`2048`, `3072`, `4096`, `1024`).
+- **`sym_cipher_test`**: Validates symmetric cipher primary key creation and
+  encryption/decryption roundtrips across variable buffer lengths and chaining
+  modes (`aes128_cfb`, `aes256_...`, `sm4_...`).
+- **`command_test`**: Validates standard command presence and compliance
+  against `TPM2_GetCapability(TPM_CAP_COMMANDS)`.
+
+## Platform profiles
+
+- **`basic_profile_algorithm_support.json5`**: Default baseline algorithm and
+  command requirement profile.
+- **`gdc_profile_algorithm_support.json5`**: Google Datacenter profile
+  enforcing strict cryptographic requirements.
+- **`pqc_profile_algorithm_support.json5`**: Post-quantum cryptography profile
+  configuration.
+
 ## Hardware safety and `sim_only` tests
 
 By default, tests are safe to run repeatedly on physical hardware TPMs without
@@ -43,7 +68,7 @@ functions.
 ## Running the tests
 
 ```bash
-# Run the full integration test suite against the TCG TPM simulator
+# Run the full integration test suite against the default profile
 bazel test //tests:rust_integration_tests
 
 # Run an individual wrapped test target
@@ -54,4 +79,10 @@ bazel test //tests:rust_integration_tests_cli_test_wrapped
 
 # Run only tests matching a specific category
 bazel test //tests:rust_integration_tests --test_env=TPM_TEST_CATEGORY=Attest
+
+# Run Google Datacenter profile compliance suite
+bazel test //tests:gdc_profile_tests
+
+# Run Post-Quantum Cryptography profile suite
+bazel test //tests:pqc_profile_tests
 ```

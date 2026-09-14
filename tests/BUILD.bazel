@@ -3,6 +3,8 @@ load("//tpm_test_runner:tpm_test.bzl", "tpm_test_suite")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(glob(["*.json5"]))
+
 rust_library(
     name = "test_common",
     testonly = True,
@@ -77,6 +79,79 @@ rust_test(
 )
 
 rust_test(
+    name = "hash_test",
+    srcs = ["src/hash_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_profile_support",
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:hex",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "ecc_curve_test",
+    srcs = ["src/ecc_curve_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        ":test_common",
+        "//tpm_profile_support",
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "rsa_key_test",
+    srcs = ["src/rsa_key_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        ":test_common",
+        "//tpm_profile_support",
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "sym_cipher_test",
+    srcs = ["src/sym_cipher_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_profile_support",
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "command_test",
+    srcs = ["src/command_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_profile_support",
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
     name = "nv_test",
     srcs = ["src/nv_test.rs"],
     edition = "2021",
@@ -100,14 +175,44 @@ rust_test(
 
 tpm_test_suite(
     name = "rust_integration_tests",
+    config = ":basic_profile_algorithm_support.json5",
     data = ["//tpm_tool"],
     tests = [
         ":attestation_test",
         ":cli_test",
+        ":command_test",
         ":context_test",
+        ":ecc_curve_test",
+        ":hash_test",
         ":key_test",
         ":nv_test",
         ":pcr_test",
+        ":rsa_key_test",
         ":startup_test",
+        ":sym_cipher_test",
+    ],
+)
+
+# Google datacenter profile tests
+tpm_test_suite(
+    name = "gdc_profile_tests",
+    config = ":gdc_profile_algorithm_support.json5",
+    tags = ["manual"],
+    tests = [
+        ":command_test",
+        ":ecc_curve_test",
+        ":hash_test",
+        ":rsa_key_test",
+        ":sym_cipher_test",
+    ],
+)
+
+# PQC profile tests
+tpm_test_suite(
+    name = "pqc_profile_tests",
+    config = ":pqc_profile_algorithm_support.json5",
+    tags = ["manual"],
+    tests = [
+        ":hash_test",
     ],
 )

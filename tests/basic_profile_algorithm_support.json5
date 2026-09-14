@@ -1,0 +1,56 @@
+{
+  profile_name: "Basic_Algorithm_Profile",
+  version: "1.0",
+  algorithms: {
+    hash: {
+      mandatory: ["sha256", "sha384"],
+      optional: ["sm3_256", "sha3_256", "sha3_384", "sha3_512"],
+      deprecated: ["sha1"],
+      not_allowed: []
+    },
+    asymmetric: {
+      rsa_key_sizes: {
+        mandatory: [2048],
+        optional: [3072, 4096],
+        not_allowed: []
+      },
+      ecc_curves: {
+        mandatory: ["nist_p256"],
+        optional: ["nist_p384", "sm2"],
+        not_allowed: []
+      }
+    },
+    symmetric: {
+      mandatory: ["aes"],
+      optional: ["sm4"],
+      not_allowed: []
+    }
+  },
+  commands: {
+    mandatory: [
+      "TPM2_CC_Startup",
+      "TPM2_CC_GetCapability",
+      "TPM2_CC_CreatePrimary",
+      "TPM2_CC_Create",
+      "TPM2_CC_Load",
+      "TPM2_CC_ReadPublic",
+      "TPM2_CC_FlushContext",
+      "TPM2_CC_Quote",
+      "TPM2_CC_PCR_Read",
+      "TPM2_CC_PCR_Extend",
+      "TPM2_CC_GetRandom",
+      "TPM2_CC_Hash"
+    ],
+    optional: [
+      "TPM2_CC_EncryptDecrypt2",
+      "TPM2_CC_Certify",
+      "TPM2_CC_Sign",
+      "TPM2_CC_VerifySignature"
+    ],
+    deprecated: [],
+    not_allowed: [
+      "TPM2_CC_FieldUpgradeStart",
+      "TPM2_CC_FieldUpgradeData"
+    ]
+  }
+}
