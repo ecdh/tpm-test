@@ -18,6 +18,8 @@ implementations against TCG specifications and custom platform profiles.
   environments.
 - `tpm_test_support/`: High-level TPM client library (`TpmClient`), dynamic
   capability discovery (`TpmConfig`), and metadata filtering framework.
+- `tpm_tool/`: Interactive command-line utility (`tpm_tool`) for manual TPM
+  operations, hashing, PCR read/extend, key creation, and quote verification.
 
 ## Prerequisites
 

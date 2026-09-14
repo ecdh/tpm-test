@@ -1,0 +1,28 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
+
+rust_binary(
+    name = "tpm_tool",
+    srcs = glob(["src/**/*.rs"]),
+    edition = "2021",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:clap",
+        "@rust_crates//:ecdsa",
+        "@rust_crates//:env_logger",
+        "@rust_crates//:hex",
+        "@rust_crates//:log",
+        "@rust_crates//:num-traits",
+        "@rust_crates//:p256",
+        "@rust_crates//:rsa",
+        "@rust_crates//:sha2",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "tpm_tool_test",
+    crate = ":tpm_tool",
+    edition = "2021",
+)
