@@ -1,0 +1,20 @@
+load("@rules_rust//rust:defs.bzl", "rust_proc_macro", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_proc_macro(
+    name = "tpm_test_macros",
+    srcs = ["src/lib.rs"],
+    edition = "2021",
+    deps = [
+        "@rust_crates//:proc-macro2",
+        "@rust_crates//:quote",
+        "@rust_crates//:syn",
+    ],
+)
+
+rust_test(
+    name = "tpm_test_macros_test",
+    crate = ":tpm_test_macros",
+    edition = "2021",
+)

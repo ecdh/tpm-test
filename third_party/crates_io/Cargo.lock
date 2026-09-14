@@ -800,8 +800,11 @@ dependencies = [
  "log",
  "num-traits",
  "p256",
+ "proc-macro2",
+ "quote",
  "rsa",
  "sha2",
+ "syn 2.0.119",
  "tss-esapi",
  "tss-esapi-sys",
 ]

@@ -24,6 +24,8 @@ and provides category/hierarchy execution filtering (`TestCaseMetadata`).
 - **Deterministic test RNG (`TestRandom`)**: Seeded pseudo-random number
   generator backed by `fastrand::Rng` for reproducible test vectors,
   configurable via `TPM_TEST_RNG_SEED` (decimal or hex).
+- **Macro re-export**: Re-exports `#[tpm_test]` from `tpm_test_macros` alongside
+  `BitFlags`, `make_bitflags`, and `env_logger` for seamless test development.
 
 ## Key abstractions
 
@@ -53,24 +55,18 @@ Wraps `tss_esapi::Context` with high-level methods:
 
 ## Usage examples
 
-### Writing a test with `TestCaseMetadata` and `TpmClient`
+### Writing a test with `#[tpm_test]` and `TpmClient`
 
 ```rust
 use tpm_test_support::tss_esapi::interface_types::algorithm::HashingAlgorithm;
-use tpm_test_support::{TestCaseMetadata, TestCategory, TestHierarchy, TpmClient};
+use tpm_test_support::{tpm_test, TpmClient};
 
-#[test]
+#[tpm_test(
+    categories = "Compliance | Pcr | Smoke",
+    hierarchies = "Null",
+    description = "Computes a SHA-256 digest using the TPM"
+)]
 fn test_hash() -> anyhow::Result<()> {
-    let metadata = TestCaseMetadata {
-        name: "test_hash",
-        description: "Computes a SHA-256 digest using the TPM",
-        categories: TestCategory::default_categories() | TestCategory::Pcr,
-        hierarchies: TestHierarchy::default_hierarchies(),
-    };
-    if !metadata.should_run() {
-        return Ok(());
-    }
-
     let mut client = TpmClient::connect_from_env()?;
     client.startup_clear()?;
 
@@ -82,8 +78,8 @@ fn test_hash() -> anyhow::Result<()> {
 
 ### Filtering test execution
 
-Tests evaluating `TestCaseMetadata::should_run()` automatically read filter
-configuration from the test environment:
+Tests annotated with `#[tpm_test]` automatically read filter configuration
+from the test environment:
 
 ```bash
 # Run only PCR compliance tests

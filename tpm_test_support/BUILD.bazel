@@ -11,6 +11,9 @@ rust_library(
         "src/tpm_config.rs",
     ],
     edition = "2021",
+    proc_macro_deps = [
+        "//tpm_test_macros",
+    ],
     deps = [
         "//third_party/tpm2_tss",
         "@rust_crates//:anyhow",

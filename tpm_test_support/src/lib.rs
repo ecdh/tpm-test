@@ -14,6 +14,7 @@ pub use metadata::{
 };
 pub use test_random::TestRandom;
 pub use tpm_config::TpmConfig;
+pub use tpm_test_macros::tpm_test;
 
 use anyhow::{anyhow, Context as _, Result};
 use ecdsa::signature::hazmat::PrehashVerifier;
