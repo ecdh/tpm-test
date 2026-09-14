@@ -1,0 +1,113 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("//tpm_test_runner:tpm_test.bzl", "tpm_test_suite")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "test_common",
+    testonly = True,
+    srcs = ["src/common.rs"],
+    edition = "2021",
+    deps = [
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "startup_test",
+    srcs = ["src/startup_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:log",
+    ],
+)
+
+rust_test(
+    name = "pcr_test",
+    srcs = ["src/pcr_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "key_test",
+    srcs = ["src/key_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        ":test_common",
+        "//tpm_test_support",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "context_test",
+    srcs = ["src/context_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:log",
+        "@rust_crates//:sha2",
+        "@rust_crates//:tss-esapi",
+        "@rust_crates//:tss-esapi-sys",
+    ],
+)
+
+rust_test(
+    name = "attestation_test",
+    srcs = ["src/attestation_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:log",
+        "@rust_crates//:sha2",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "nv_test",
+    srcs = ["src/nv_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "cli_test",
+    srcs = ["src/cli_test.rs"],
+    data = ["//tpm_tool"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+    ],
+)
+
+tpm_test_suite(
+    name = "rust_integration_tests",
+    data = ["//tpm_tool"],
+    tests = [
+        ":attestation_test",
+        ":cli_test",
+        ":context_test",
+        ":key_test",
+        ":nv_test",
+        ":pcr_test",
+        ":startup_test",
+    ],
+)

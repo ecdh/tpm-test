@@ -20,6 +20,8 @@ implementations against TCG specifications and custom platform profiles.
   capability discovery (`TpmConfig`), and metadata filtering framework.
 - `tpm_tool/`: Interactive command-line utility (`tpm_tool`) for manual TPM
   operations, hashing, PCR read/extend, key creation, and quote verification.
+- `tests/`: Compliance and integration test suites validating TPM 2.0
+  behavior against TCG specifications and custom platform profiles.
 
 ## Prerequisites
 
