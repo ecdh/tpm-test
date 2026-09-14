@@ -11,6 +11,9 @@ implementations against TCG specifications and custom platform profiles.
 - `tpm_proxy/`: Extensible TCP TPM proxy engine (`tpm_proxy_lib` + `tpm_proxy`
   binary) implementing the MSSIM protocol for hardware devboards, sockets,
   and simulators.
+- `tpm_test_runner/`: Unified Bazel test execution framework with dynamic
+  simulator lifecycle management, port allocation, and late-bound test
+  environments.
 
 ## Prerequisites
 
