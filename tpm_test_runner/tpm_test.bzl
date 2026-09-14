@@ -19,6 +19,8 @@ def _tpm_wrapped_test_impl(ctx):
         env["TPM_TEST_EXCLUDE_CATEGORY"] = ctx.attr.exclude_category
     if ctx.attr.hierarchies:
         env["TPM_TEST_HIERARCHIES"] = ctx.attr.hierarchies
+    if ctx.file.config:
+        env["TPM_PROFILE_CONFIG"] = ctx.file.config.short_path
 
     # Generate the runner script.
     output_script = ctx.actions.declare_file(ctx.label.name + "_runner.sh")
@@ -39,6 +41,8 @@ def _tpm_wrapped_test_impl(ctx):
     # from all rule attributes (test_binary, test_runner, setup_tool, teardown_tool, data).
     # We only need to provide any direct executables and merge TpmEnvInfo runfiles.
     runfiles_files = [test_runner, test_binary] + ctx.files.data
+    if ctx.file.config:
+        runfiles_files.append(ctx.file.config)
     if ctx.executable.setup_tool:
         runfiles_files.append(ctx.executable.setup_tool)
     if ctx.executable.teardown_tool:
@@ -62,6 +66,10 @@ _tpm_wrapped_test = rule(
     attrs = {
         "category": attr.string(
             doc = "Optional category inclusion filter (comma-separated).",
+        ),
+        "config": attr.label(
+            allow_single_file = True,
+            doc = "Optional TPM profile configuration file (e.g. JSON5).",
         ),
         "data": attr.label_list(
             allow_files = True,
@@ -115,6 +123,7 @@ def tpm_test_suite(
         name,
         tests = [],
         size = "small",
+        config = None,
         data = [],
         environment = None,
         setup_tool = None,
@@ -160,6 +169,7 @@ def tpm_test_suite(
             args = args,
             tags = tags,
             size = size,
+            config = config,
             data = data,
             environment = environment,
             setup_tool = setup_tool,

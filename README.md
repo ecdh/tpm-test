@@ -8,6 +8,8 @@ implementations against TCG specifications and custom platform profiles.
 
 - `third_party/`: Third-party dependencies including native `tcg_tpm`,
   static `tpm2_tss`, `tss_esapi_sys` FFI, and pinned Rust crates.
+- `tpm_profile_support/`: Platform profile and algorithm requirement parser
+  evaluating JSON5 specifications against runtime TPM capabilities.
 - `tpm_proxy/`: Extensible TCP TPM proxy engine (`tpm_proxy_lib` + `tpm_proxy`
   binary) implementing the MSSIM protocol for hardware devboards, sockets,
   and simulators.

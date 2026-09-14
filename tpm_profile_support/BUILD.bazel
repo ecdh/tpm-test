@@ -1,0 +1,21 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "tpm_profile_support",
+    srcs = ["src/lib.rs"],
+    edition = "2021",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@rust_crates//:anyhow",
+        "@rust_crates//:clap",
+        "@rust_crates//:log",
+        "@rust_crates//:serde",
+        "@rust_crates//:serde_json5",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
+rust_test(
+    name = "tpm_profile_support_test",
+    crate = ":tpm_profile_support",
+)

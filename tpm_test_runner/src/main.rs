@@ -514,6 +514,7 @@ fn main() -> Result<()> {
         .unwrap_or(false);
     let test_command =
         env::var("TEST_COMMAND").context("TEST_COMMAND environment variable not set")?;
+    let profile_config_env = env::var("TPM_PROFILE_CONFIG").ok();
 
     let lock_id_env = env::var("TPM_LOCK_ID").ok().filter(|s| !s.is_empty());
 
@@ -521,6 +522,9 @@ fn main() -> Result<()> {
     info!("  TPM_TYPE:     {}", tpm_type);
     if let Some(ref lock_id) = lock_id_env {
         info!("  LOCK_ID:      {}", lock_id);
+    }
+    if let Some(ref cfg) = profile_config_env {
+        info!("  CONFIG:       {}", cfg);
     }
     info!("  TEST_COMMAND: {}", test_command);
     if dry_run {
