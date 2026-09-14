@@ -173,6 +173,20 @@ rust_test(
     ],
 )
 
+rust_test(
+    name = "policy_tree_test",
+    srcs = ["src/policy_tree_test.rs"],
+    edition = "2021",
+    tags = ["manual"],
+    deps = [
+        "//tpm_test_support",
+        "@rust_crates//:anyhow",
+        "@rust_crates//:hex",
+        "@rust_crates//:log",
+        "@rust_crates//:tss-esapi",
+    ],
+)
+
 tpm_test_suite(
     name = "rust_integration_tests",
     config = ":basic_profile_algorithm_support.json5",
@@ -187,6 +201,7 @@ tpm_test_suite(
         ":key_test",
         ":nv_test",
         ":pcr_test",
+        ":policy_tree_test",
         ":rsa_key_test",
         ":startup_test",
         ":sym_cipher_test",
@@ -202,6 +217,7 @@ tpm_test_suite(
         ":command_test",
         ":ecc_curve_test",
         ":hash_test",
+        ":policy_tree_test",
         ":rsa_key_test",
         ":sym_cipher_test",
     ],

@@ -29,6 +29,11 @@ fresh simulator or proxy environment for isolated execution.
   restarts.
 - **`cli_test`**: Validates end-to-end `tpm_tool` CLI subcommands (`startup`,
   `get-random`, `hash`, `pcr`, `ek`, and `quote`) against a live TPM.
+- **`policy_tree_test`**: Validates compound authorization policies,
+  multi-branch `TPM2_PolicyOR`, nested policy trees, policy locality,
+  `TPM2_PolicyNV`, `TPM2_PolicySigned`, `TPM2_PolicyAuthorize` with signature
+  verification tickets, NIAP PP trial policy test vectors, and session restart
+  semantics.
 
 ### Profile-driven compliance suites
 

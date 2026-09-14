@@ -41,7 +41,8 @@ use tss_esapi::attributes::{
 use tss_esapi::constants::tss::{TPM2_RH_NULL, TPM2_ST_HASHCHECK};
 use tss_esapi::constants::{CapabilityType, CommandCode, SessionType, StartupType};
 use tss_esapi::handles::{
-    AuthHandle, KeyHandle, NvIndexHandle, ObjectHandle, PcrHandle, PersistentTpmHandle, TpmHandle,
+    AuthHandle, KeyHandle, NvIndexHandle, ObjectHandle, PcrHandle, PersistentTpmHandle,
+    SessionHandle, TpmHandle,
 };
 use tss_esapi::interface_types::algorithm::{
     HashingAlgorithm, PublicAlgorithm, SignatureSchemeAlgorithm, SymmetricMode,
@@ -714,6 +715,156 @@ impl TpmClient {
         self.context
             .policy_nv_written(policy_session, written_set)
             .context("policy_nv_written")
+    }
+
+    /// Obtains the underlying ESYS_CONTEXT pointer from the Context structure.
+    ///
+    /// # Safety
+    /// The upstream `tss-esapi` crate (v7.6.0) does not expose a wrapper for
+    /// `Esys_PolicyNV`. To enable compound policy evaluation without patching
+    /// upstream crate sources, this helper inspects the internal ESYS context
+    /// pointer. Caller must ensure `self.context` is properly initialized.
+    unsafe fn get_esys_context(&mut self) -> Result<*mut tss_esapi::tss2_esys::ESYS_CONTEXT> {
+        let base = &mut self.context as *mut Context as *mut usize;
+        let esys_ctx = *base.add(12) as *mut tss_esapi::tss2_esys::ESYS_CONTEXT;
+        if esys_ctx.is_null() {
+            return Err(anyhow!("Failed to obtain valid ESYS context pointer"));
+        }
+        Ok(esys_ctx)
+    }
+
+    /// Executes TPM2_PolicyNV on the active policy session.
+    pub fn policy_nv(
+        &mut self,
+        auth_handle: NvAuth,
+        nv_index: NvIndexHandle,
+        policy_session: PolicySession,
+        operand_b: &[u8],
+        offset: u16,
+        operation: u16,
+    ) -> Result<()> {
+        if operand_b.len() > 64 {
+            return Err(anyhow!("OperandB too large (max 64 bytes)"));
+        }
+        let mut op_b = tss_esapi::tss2_esys::TPM2B_OPERAND {
+            size: operand_b.len() as u16,
+            buffer: [0u8; 64],
+        };
+        op_b.buffer[..operand_b.len()].copy_from_slice(operand_b);
+
+        let auth_tr: tss_esapi::tss2_esys::ESYS_TR = AuthHandle::from(auth_handle).into();
+        let esys_ctx = unsafe { self.get_esys_context()? };
+        let ret = unsafe {
+            tss_esapi::tss2_esys::Esys_PolicyNV(
+                esys_ctx,
+                auth_tr,
+                nv_index.into(),
+                SessionHandle::from(policy_session).into(),
+                tss_esapi::tss2_esys::ESYS_TR_PASSWORD,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                &op_b,
+                offset,
+                operation,
+            )
+        };
+        if ret != 0 {
+            Err(anyhow!("policy_nv failed: TPM RC 0x{:08X}", ret))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Executes TPM2_PolicyCounterTimer on the active policy session.
+    pub fn policy_counter_timer(
+        &mut self,
+        policy_session: PolicySession,
+        operand_b: &[u8],
+        offset: u16,
+        operation: u16,
+    ) -> Result<()> {
+        if operand_b.len() > 64 {
+            return Err(anyhow!("OperandB too large (max 64 bytes)"));
+        }
+        let mut op_b = tss_esapi::tss2_esys::TPM2B_OPERAND {
+            size: operand_b.len() as u16,
+            buffer: [0u8; 64],
+        };
+        op_b.buffer[..operand_b.len()].copy_from_slice(operand_b);
+
+        let esys_ctx = unsafe { self.get_esys_context()? };
+        let ret = unsafe {
+            tss_esapi::tss2_esys::Esys_PolicyCounterTimer(
+                esys_ctx,
+                SessionHandle::from(policy_session).into(),
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                &op_b,
+                offset,
+                operation,
+            )
+        };
+        if ret != 0 {
+            Err(anyhow!("policy_counter_timer failed: TPM RC 0x{:08X}", ret))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Executes TPM2_PolicySigned on the active policy session.
+    ///
+    /// Note: `tss-esapi` v7.6.0's `Context::policy_signed` wrapper erroneously requires
+    /// an active `shandle1` authorization session, whereas `TPM2_PolicySigned` takes no
+    /// session authorization (`ESYS_TR_NONE`). Calling `Esys_PolicySigned` directly avoids
+    /// that upstream wrapper bug.
+    pub fn policy_signed(
+        &mut self,
+        policy_session: PolicySession,
+        auth_object: ObjectHandle,
+        nonce_tpm: Nonce,
+        cp_hash_a: Digest,
+        policy_ref: Nonce,
+        expiration: i32,
+        signature: Signature,
+    ) -> Result<()> {
+        let raw_nonce_tpm: tss_esapi::tss2_esys::TPM2B_NONCE = nonce_tpm.into();
+        let raw_cp_hash_a: tss_esapi::tss2_esys::TPM2B_DIGEST = cp_hash_a.into();
+        let raw_policy_ref: tss_esapi::tss2_esys::TPM2B_NONCE = policy_ref.into();
+        let raw_sig: tss_esapi::tss2_esys::TPMT_SIGNATURE = signature.try_into()?;
+
+        let mut timeout_ptr: *mut tss_esapi::tss2_esys::TPM2B_TIMEOUT = std::ptr::null_mut();
+        let mut ticket_ptr: *mut tss_esapi::tss2_esys::TPMT_TK_AUTH = std::ptr::null_mut();
+
+        let esys_ctx = unsafe { self.get_esys_context()? };
+        let ret = unsafe {
+            tss_esapi::tss2_esys::Esys_PolicySigned(
+                esys_ctx,
+                auth_object.into(),
+                SessionHandle::from(policy_session).into(),
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                tss_esapi::tss2_esys::ESYS_TR_NONE,
+                &raw_nonce_tpm,
+                &raw_cp_hash_a,
+                &raw_policy_ref,
+                expiration,
+                &raw_sig,
+                &mut timeout_ptr,
+                &mut ticket_ptr,
+            )
+        };
+        if !timeout_ptr.is_null() {
+            unsafe { tss_esapi::tss2_esys::Esys_Free(timeout_ptr as *mut _) };
+        }
+        if !ticket_ptr.is_null() {
+            unsafe { tss_esapi::tss2_esys::Esys_Free(ticket_ptr as *mut _) };
+        }
+        if ret != 0 {
+            Err(anyhow!("policy_signed failed: TPM RC 0x{:08X}", ret))
+        } else {
+            Ok(())
+        }
     }
 
     pub fn tr_set_auth(&mut self, object_handle: ObjectHandle, auth: Auth) -> Result<()> {

@@ -42,6 +42,8 @@ Wraps `tss_esapi::Context` with high-level methods:
 - `create_primary()`, `create_rsa_srk_primary()`: Primary key creation under
   Owner or Platform hierarchies.
 - `create_ek()`, `setup_ak()`, `quote()`: Common attestation flows.
+- `policy_command_code()`, `policy_or()`, `policy_locality()`, `policy_nv()`:
+  Compound authorization policy construction and evaluation.
 
 ### Test metadata and filtering
 
